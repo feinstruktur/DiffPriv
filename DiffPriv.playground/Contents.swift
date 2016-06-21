@@ -50,9 +50,9 @@ let truth = sample30.map { $0.hasConsumedMarijuana }
 yesRatio(values: responses)
 yesRatio(values: truth)
 
-let sampleSizeProgression = stride(from: 50, to: 1000, by: 50).map { createSample(consumerFraction: fraction, size: $0) }
+//let sampleSizeProgression = stride(from: 50, to: 1000, by: 50).map { createSample(consumerFraction: fraction, size: $0) }
 //let responseProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.response }) }
-let truthProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.hasConsumedMarijuana }) }
+//let truthProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.hasConsumedMarijuana }) }
 
 func min<T: Comparable>(_ values: [T]) -> T? {
     guard values.count > 0 else { return nil }
@@ -64,13 +64,25 @@ func max<T: Comparable>(_ values: [T]) -> T? {
     return values.reduce(values[0], combine: max)
 }
 
-func GraphCoordinateTransformer(graphRange: CGFloat, valueRange: CGFloat) -> (CGFloat) -> (CGFloat) {
-    return { value in
-        return graphRange - value * graphRange / valueRange
+typealias ValueRange = (min: Double, max: Double)
+
+// transform from value coordinates to graphics canvas coordinates
+func ValueCoordinateTransformer(valueRange: (x: ValueRange, y: ValueRange), frame: CGRect) -> (Double, Double) -> (CGFloat, CGFloat) {
+    return { (x, y) in
+        return (
+            frame.origin.x + CGFloat((x - valueRange.x.min) / valueRange.x.max) * frame.size.width,
+            frame.size.height + frame.origin.y - CGFloat((y - valueRange.y.min) / valueRange.y.max) * frame.size.height
+        )
     }
 }
 
 public class Graph: UIView {
+
+    public var x = [Double]() {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
 
     public var y = [Double]() {
         didSet {
@@ -78,9 +90,21 @@ public class Graph: UIView {
         }
     }
 
+    public var xRange: (min: Double, max: Double)? {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
+
+    public var yRange: (min: Double, max: Double)? {
+        didSet {
+            self.setNeedsDisplay()
+        }
+    }
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.clear()
+        self.backgroundColor = UIColor.lightGray()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -89,36 +113,47 @@ public class Graph: UIView {
 
     public override func draw(_ rect: CGRect) {
         guard
-            self.y.count > 0,
-//            let minimum = min(self.y),
-            let maximum = max(self.y) else { return }
-        let n = CGFloat(self.y.count)
-        let yRange = CGFloat(maximum)
-        let xStep = rect.width / n
+            self.y.count > 0 && (self.x.count == self.y.count || self.x.count == 0),
+            let ymin = min(self.y),
+            let ymax = max(self.y) else { return }
+
+        let x: [Double] = {
+            if self.x.count == 0 {
+                return (0..<self.y.count).map { Double($0) }
+            } else {
+                return self.x
+            }
+        }()
+
+        guard
+            let xmin = min(x),
+            let xmax = max(x) else { return }
+
+        let xRange = self.xRange ?? (xmin, xmax)
+        let yRange = self.yRange ?? (ymin, ymax)
+
+        let padding: CGFloat = 10
+        let canvas = rect.insetBy(dx: padding, dy: padding)
+        UIColor.white().setFill()
+        UIBezierPath(rect: canvas).fill()
+
         let gColor = UIColor.blue()
         gColor.setFill()
-        var xPos: CGFloat = 0
 
-        let toHeight = GraphCoordinateTransformer(graphRange: rect.height, valueRange: yRange)
-        for val in self.y {
-            let yPos = toHeight(CGFloat(val))
+        let toCoordinate = ValueCoordinateTransformer(valueRange: (xRange, yRange), frame: canvas)
+        for val in zip(x, self.y) {
+            let pos = toCoordinate(val.0, val.1)
             let radius: CGFloat = 3.0
-            let r = CGRect(x: xPos - radius, y: yPos - radius, width: 2 * radius, height: 2 * radius)
+            let r = CGRect(x: pos.0 - radius, y: pos.1 - radius, width: 2 * radius, height: 2 * radius)
             UIBezierPath(ovalIn: r).fill()
-            xPos += xStep
         }
     }
 
 }
 
 let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
-graph.y = truthProgression
+graph.y = [0.0, 0.2, 0.3, 0.1, 0.4, 1.0]
 graph
-
-
-
-
-
 
 
 
