@@ -152,7 +152,8 @@ public class Graph: UIView {
 }
 
 let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
-graph.y = [0.0, 0.2, 0.3, 0.1, 0.4, 1.0]
+graph.y = [0.0, 0.2, 0.3, 0.1, 0.4, 0.8]
+graph.yRange = (0.0, 1.0)
 graph
 
 
