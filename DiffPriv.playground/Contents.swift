@@ -1,7 +1,5 @@
 import UIKit
 
-typealias ValueRange = (min: Double, max: Double)
-
 // transform from value coordinates to graphics canvas coordinates
 func ValueCoordinateTransformer(valueRange: (x: ValueRange, y: ValueRange), frame: CGRect) -> (Double, Double) -> (CGFloat, CGFloat) {
     return { (x, y) in
@@ -121,7 +119,7 @@ public class Graph: UIView {
 
 let fraction = 0.3
 
-let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: 1000, iterations: 40)
+let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: 5000, iterations: 40)
 
 let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 //graph.ySeries = [
@@ -139,10 +137,12 @@ graph
 
 
 
+let hist = Histogram(values: responses, nBins: 50, range: (0.2, 0.6))!
 
-
-
-
+let hGraph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
+hGraph.ySeries = [hist.counts]
+hGraph.colors = [UIColor.blue()]
+hGraph
 
 
 
