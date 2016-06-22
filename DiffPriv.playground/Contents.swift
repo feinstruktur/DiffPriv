@@ -50,7 +50,7 @@ public class Graph: UIView {
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor.lightGray()
+        self.backgroundColor = UIColor.init(white: 0.9, alpha: 1)
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -118,37 +118,38 @@ public class Graph: UIView {
 }
 
 
-
-
-
-var graphs = [Graph]()
-for sampleSize in stride(from: 1000, through: 10000, by: 2000) {
-    let fraction = 0.3
-    let hGraph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
-
-    let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: sampleSize, iterations: 100)
+func createGraph(sampleSize: Int) -> Graph {
+    let graph = Graph()
+    let (responses, _) = createSamples(trueConsumerFraction: 0.3, sampleSize: sampleSize, iterations: 100)
     if let hist = Histogram(values: responses, nBins: 50, range: (0.3, 0.5)) {
-        hGraph.ySeries = [hist.counts]
+        graph.ySeries = [hist.counts]
     }
-    graphs.append(hGraph)
+    return graph
 }
 
-graphs
 
+let size = CGSize(width: 300, height: 800)
 
+let samples = stride(from: 1000, through: 10000, by: 2000)
+Array(samples)
 
-
-
-
-
-
-
-
-
-
-
-
-
+let columns = 2
+let plots = samples.map { createGraph(sampleSize: $0) }
+let plotsPerRow = stride(from: 0, through: plots.count, by: columns).map { start in
+     Array(plots[start..<(start + columns < plots.count ? start + columns : plots.count)])
+}
+let stackViews: [UIStackView] = plotsPerRow.map { row in
+    let s = UIStackView()
+    s.axis = .horizontal
+    s.distribution = .fillEqually
+    row.forEach(s.addArrangedSubview)
+    return s
+}
+let canvas = UIStackView(frame: CGRect(x: 0, y: 0, width: 100 * stackViews.count, height: 400))
+canvas.distribution = .fillEqually
+canvas.axis = .vertical
+stackViews.forEach(canvas.addArrangedSubview)
+canvas
 
 
 
