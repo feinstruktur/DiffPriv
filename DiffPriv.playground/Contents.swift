@@ -1,62 +1,5 @@
 import UIKit
 
-// random uniform [0, max[
-public func random(_ max: UInt32) -> UInt32 {
-    return arc4random_uniform(max + 1)
-}
-
-// random uniform [0,1[
-public func random() -> Double {
-    return Double(random(UINT32_MAX-1)) / Double(UINT32_MAX-1)
-}
-
-// Uniform randum number from [a, b[, where b >= a
-public func random(from: Double, to: Double) -> Double {
-    assert(to >= from, "upper bound must be greater than or equal to lower bound")
-    return from + (to-from) * random()
-}
-
-// random True, False
-func coinIsTails() -> Bool {
-    return random(1) == 1
-}
-
-// https://en.wikipedia.org/wiki/Randomized_response
-func randomizedResponse(truth: Bool) -> Bool {
-    if coinIsTails() {
-        return coinIsTails()
-    } else {
-        return truth
-    }
-}
-
-struct Interviewee {
-    let hasConsumedMarijuana: Bool
-
-    var response: Bool {
-        return randomizedResponse(truth: self.hasConsumedMarijuana)
-    }
-}
-
-func createSample(consumerFraction: Double, size: Int) -> [Interviewee] {
-    return (0..<size).map { _ in Interviewee(hasConsumedMarijuana: random() < consumerFraction) }
-}
-
-func yesRatio(values: [Bool]) -> Double {
-    let sum = values.reduce(0.0) { total, value in total + (value ? 1 : 0) }
-    return sum/Double(values.count)
-}
-
-func min<T: Comparable>(_ values: [T]) -> T? {
-    guard values.count > 0 else { return nil }
-    return values.reduce(values[0], combine: min)
-}
-
-func max<T: Comparable>(_ values: [T]) -> T? {
-    guard values.count > 0 else { return nil }
-    return values.reduce(values[0], combine: max)
-}
-
 typealias ValueRange = (min: Double, max: Double)
 
 // transform from value coordinates to graphics canvas coordinates
@@ -178,16 +121,7 @@ public class Graph: UIView {
 
 let fraction = 0.3
 
-//let n = 1
-//let sample30 = createSample(consumerFraction: fraction, size: n)
-//let responses = sample30.map { $0.response }
-//let truth = sample30.map { $0.hasConsumedMarijuana }
-//yesRatio(values: responses)
-//yesRatio(values: truth)
-
-let sampleSizeProgression = stride(from: 50, to: 1000, by: 50).map { createSample(consumerFraction: fraction, size: $0) }
-let responseProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.response }) }
-let truthProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.hasConsumedMarijuana }) }
+let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: 1000, iterations: 40)
 
 let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 //graph.ySeries = [
@@ -195,8 +129,8 @@ let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 //    [0.1, 0.4, 0.4, 0.2, 0.6, 0.9]
 //]
 graph.ySeries = [
-    responseProgression,
-    truthProgression
+    responses,
+    truths
 ]
 graph.colors = [UIColor.blue(), UIColor.red()]
 graph.yRange = (0.0, 1.0)
