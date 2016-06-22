@@ -121,16 +121,7 @@ public class Graph: UIView {
 
 let fraction = 0.3
 
-//let n = 1
-//let sample30 = createSample(consumerFraction: fraction, size: n)
-//let responses = sample30.map { $0.response }
-//let truth = sample30.map { $0.hasConsumedMarijuana }
-//yesRatio(values: responses)
-//yesRatio(values: truth)
-
-let sampleSizeProgression = stride(from: 50, to: 1000, by: 50).map { createSample(consumerFraction: fraction, size: $0) }
-let responseProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.response }) }
-let truthProgression = sampleSizeProgression.map { sample in yesRatio(values: sample.map { $0.hasConsumedMarijuana }) }
+let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: 1000, iterations: 40)
 
 let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 //graph.ySeries = [
@@ -138,8 +129,8 @@ let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 //    [0.1, 0.4, 0.4, 0.2, 0.6, 0.9]
 //]
 graph.ySeries = [
-    responseProgression,
-    truthProgression
+    responses,
+    truths
 ]
 graph.colors = [UIColor.blue(), UIColor.red()]
 graph.yRange = (0.0, 1.0)

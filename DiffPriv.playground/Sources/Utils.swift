@@ -21,27 +21,7 @@ public func coinIsTails() -> Bool {
     return random(1) == 1
 }
 
-// https://en.wikipedia.org/wiki/Randomized_response
-public func randomizedResponse(truth: Bool) -> Bool {
-    if coinIsTails() {
-        return coinIsTails()
-    } else {
-        return truth
-    }
-}
-
-public struct Interviewee {
-    public let hasConsumedMarijuana: Bool
-
-    public var response: Bool {
-        return randomizedResponse(truth: self.hasConsumedMarijuana)
-    }
-}
-
-public func createSample(consumerFraction: Double, size: Int) -> [Interviewee] {
-    return (0..<size).map { _ in Interviewee(hasConsumedMarijuana: random() < consumerFraction) }
-}
-
+// compute ratio of True value counts in Bool array
 public func yesRatio(values: [Bool]) -> Double {
     let sum = values.reduce(0.0) { total, value in total + (value ? 1 : 0) }
     return sum/Double(values.count)
