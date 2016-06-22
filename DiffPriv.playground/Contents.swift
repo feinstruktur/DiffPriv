@@ -117,38 +117,23 @@ public class Graph: UIView {
 
 }
 
-let fraction = 0.3
-
-let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: 5000, iterations: 40)
-
-let graph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
-//graph.ySeries = [
-//    [0.0, 0.2, 0.3, 0.1, 0.4, 0.8],
-//    [0.1, 0.4, 0.4, 0.2, 0.6, 0.9]
-//]
-graph.ySeries = [
-    responses,
-    truths
-]
-graph.colors = [UIColor.blue(), UIColor.red()]
-graph.yRange = (0.0, 1.0)
-graph
 
 
 
 
-let hist = Histogram(values: responses, nBins: 50, range: (0.2, 0.6))!
+var graphs = [Graph]()
+for sampleSize in stride(from: 1000, through: 10000, by: 2000) {
+    let fraction = 0.3
+    let hGraph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
 
-let hGraph = Graph(frame: CGRect(x: 0, y: 0, width: 300, height: 200))
-hGraph.ySeries = [hist.counts]
-hGraph.colors = [UIColor.blue()]
-hGraph
+    let (responses, truths) = createSamples(trueConsumerFraction: 0.3, sampleSize: sampleSize, iterations: 100)
+    if let hist = Histogram(values: responses, nBins: 50, range: (0.3, 0.5)) {
+        hGraph.ySeries = [hist.counts]
+    }
+    graphs.append(hGraph)
+}
 
-
-
-
-
-
+graphs
 
 
 
