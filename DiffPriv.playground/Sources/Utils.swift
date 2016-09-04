@@ -29,11 +29,11 @@ public func yesRatio(values: [Bool]) -> Double {
 
 public func min<T: Comparable>(_ values: [T]) -> T? {
     guard values.count > 0 else { return nil }
-    return values.reduce(values[0], combine: min)
+    return values.reduce(values[0], min)
 }
 
 public func max<T: Comparable>(_ values: [T]) -> T? {
     guard values.count > 0 else { return nil }
-    return values.reduce(values[0], combine: max)
+    return values.reduce(values[0], max)
 }
 
