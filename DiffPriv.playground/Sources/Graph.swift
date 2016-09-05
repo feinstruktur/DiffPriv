@@ -65,7 +65,7 @@ public class Graph: UIView {
         let toCoordinate = ValueCoordinateTransformer(valueRange: (xRange, yRange), frame: canvas)
         for val in zip(x, y) {
             let pos = toCoordinate(val.0, val.1)
-            let radius: CGFloat = 3.0
+            let radius: CGFloat = 1.5
             let r = CGRect(x: pos.0 - radius, y: pos.1 - radius, width: 2 * radius, height: 2 * radius)
             UIBezierPath(ovalIn: r).fill()
         }
